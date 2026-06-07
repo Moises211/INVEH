@@ -64,7 +64,7 @@ class Persistencia {
     async ObtenerVehiculosPrecargados() {
         try {
             
-            var r = await fetch("./data/inventario_vehiculos_precargados.json");
+            var r = await fetch("./JS/data/inventario_vehiculos_precargados.json");
             if (!r.ok) throw new Error('No se pudo cargar el archivo');  
             var datos = await r.json();
             
