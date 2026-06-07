@@ -122,11 +122,26 @@ async function enviarFormulario(evento) {
 
   vehiculo.anio = parseInt(vehiculo.anio, 10);
   vehiculo.precioUSD = parseFloat(vehiculo.precioUSD);
+  console.log("Vehículo a guardar:", vehiculo);
 
   if (await persistencia.GuardarVehiculo(vehiculo)) {
+
     formuVeh.reset();
+
     document.getElementById("imput-id").value = "";
+
+    const inventarioActualizado =
+      await persistencia.ObtenerVehiculos();
+
+    inventarioActual =
+      inventarioActualizado;
+
+    workerAnalitica.postMessage(
+      inventarioActual
+    );
+
     alert("Vehiculo guardado");
+
   } else {
     mostrarMsgErr("Error crítico: No se pudo escribir en el almacenamiento del navegador.");
   }

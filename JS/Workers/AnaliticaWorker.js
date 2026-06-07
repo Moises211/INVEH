@@ -8,6 +8,7 @@ self.onmessage = function (e) {
 
         const precio = parseFloat(
             vehiculo.precioUSD ??
+            vehiculo._precioUSD ??
             vehiculo.precio ??
             0
         );
@@ -19,7 +20,8 @@ self.onmessage = function (e) {
     const estados = {
         disponible: 0,
         vendido: 0,
-        mantenimiento: 0
+        mantenimiento: 0,
+        reservado: 0
     };
 
     const sucursales = {
@@ -30,19 +32,25 @@ self.onmessage = function (e) {
 
     inventario.forEach(vehiculo => {
 
-        const estado =
-            String(vehiculo.estado || "")
-                .toLowerCase();
+        const estado = String(
+            vehiculo.estado ??
+            vehiculo._estado ??
+            ""
+        ).toLowerCase();
 
         if (estados[estado] !== undefined) {
             estados[estado]++;
         }
 
+        const sucursal = 
+            vehiculo.sucursalId ??
+            vehiculo._sucursalId;
+
         if (
-            vehiculo.sucursalId &&
-            sucursales[vehiculo.sucursalId] !== undefined
+            sucursal &&
+            sucursales[sucursal] !== undefined
         ) {
-            sucursales[vehiculo.sucursalId]++;
+            sucursales[sucursal]++;
         }
 
     });
