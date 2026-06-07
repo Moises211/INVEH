@@ -67,7 +67,7 @@ class Persistencia {
             if (!r.ok) throw new Error('No se pudo cargar el archivo');  
             var datos = await r.json();
             
-            return datos.vehiculo;
+            return datos.vehiculos;
         } catch (err){
             console.error("Error en ObtenerVehiculosPrecargados:", err);
             return [];

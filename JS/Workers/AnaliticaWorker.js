@@ -5,13 +5,21 @@ self.onmessage = function (e) {
     const totalVehiculos = inventario.length;
 
     const valorFlota = inventario.reduce((suma, vehiculo) => {
-        return suma + parseFloat(vehiculo.precioUSD || 0);
+
+        const precio = parseFloat(
+            vehiculo.precioUSD ??
+            vehiculo.precio ??
+            0
+        );
+
+        return suma + precio;
+
     }, 0);
 
     const estados = {
-        Disponible: 0,
-        Vendido: 0,
-        Mantenimiento: 0
+        disponible: 0,
+        vendido: 0,
+        mantenimiento: 0
     };
 
     const sucursales = {
@@ -22,11 +30,18 @@ self.onmessage = function (e) {
 
     inventario.forEach(vehiculo => {
 
-        if (estados[vehiculo.estado] !== undefined) {
-            estados[vehiculo.estado]++;
+        const estado =
+            String(vehiculo.estado || "")
+                .toLowerCase();
+
+        if (estados[estado] !== undefined) {
+            estados[estado]++;
         }
 
-        if (sucursales[vehiculo.sucursalId] !== undefined) {
+        if (
+            vehiculo.sucursalId &&
+            sucursales[vehiculo.sucursalId] !== undefined
+        ) {
             sucursales[vehiculo.sucursalId]++;
         }
 
