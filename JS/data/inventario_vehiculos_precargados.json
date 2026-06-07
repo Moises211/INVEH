@@ -5,8 +5,8 @@
       "marca": "Toyota",
       "modelo": "Corolla",
       "anio": 2022,
-      "precio": 20000,
-      "estado": "disponible",
+      "precioUSD": 20000,
+      "estado": "Disponible",
       "sucursalId": "suc-santa-ana"
     },
     {
@@ -14,8 +14,8 @@
       "marca": "Honda",
       "modelo": "Civic",
       "anio": 2021,
-      "precio": 19000,
-      "estado": "mantenimiento",
+      "precioUSD": 19000,
+      "estado": "Mantenimiento",
       "sucursalId": "suc-san-salvador"
     },
     {
@@ -23,8 +23,8 @@
       "marca": "Nissan",
       "modelo": "Versa",
       "anio": 2020,
-      "precio": 15000,
-      "estado": "vendido",
+      "precioUSD": 15000,
+      "estado": "Vendido",
       "sucursalId": "suc-san-miguel"
     }
   ]

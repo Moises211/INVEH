@@ -32,11 +32,20 @@ async function cargarDataInicial() {
   const inventario =
     await persistencia.ObtenerVehiculos();
 
-  inventarioActual = inventario;
+  inventarioActual =
+    inventario;
 
   console.log("Inventario cargado");
 
-  workerAnalitica.postMessage(inventario);
+  renderizarTabla(
+    inventarioActual
+  );
+
+  aplicarFiltros();
+
+  workerAnalitica.postMessage(
+    inventario
+  );
 
 }
 
@@ -77,6 +86,36 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
   }
+
+  const txtBusqueda =
+    document.getElementById("txtBusqueda");
+
+  if (txtBusqueda) {
+
+    txtBusqueda.addEventListener(
+      "input",
+      aplicarFiltros
+    );
+
+  }
+
+  const filtroEstado =
+    document.getElementById("filtroEstado");
+
+  if (filtroEstado) {
+
+    filtroEstado.addEventListener(
+      "change",
+      aplicarFiltros
+    );
+
+  }
+
+  document.getElementById("txtBusqueda").value =
+    sessionStorage.getItem("busquedaVehiculo") || "";
+
+  document.getElementById("filtroEstado").value =
+    sessionStorage.getItem("estadoVehiculo") || "";
 
   cargarDataInicial();
 
@@ -136,6 +175,10 @@ async function enviarFormulario(evento) {
     inventarioActual =
       inventarioActualizado;
 
+    renderizarTabla(
+      inventarioActual
+    );
+
     workerAnalitica.postMessage(
       inventarioActual
     );
@@ -145,6 +188,102 @@ async function enviarFormulario(evento) {
   } else {
     mostrarMsgErr("Error crítico: No se pudo escribir en el almacenamiento del navegador.");
   }
+}
+
+function renderizarTabla(vehiculos) {
+
+  const tbody =
+    document.getElementById("tablaVehiculos");
+
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  vehiculos.forEach(v => {
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${v.marca ?? v._marca}</td>
+        <td>${v.modelo ?? v._modelo}</td>
+        <td>${v.anio ?? v._anio}</td>
+
+        <td>
+        $${Number(
+      v.precioUSD ??
+      v._precioUSD ??
+      v.precio ??
+      0
+    ).toLocaleString()}
+        </td>
+
+        <td>${v.estado ?? v._estado}</td>
+
+        <td>
+        ${v.sucursalId ??
+      v._sucursalId ??
+      v._suculsalId}
+        </td>
+      </tr>
+    `;
+
+  });
+
+}
+
+function aplicarFiltros() {
+
+  const textoBusqueda =
+    document.getElementById("txtBusqueda")
+      .value
+      .toLowerCase();
+
+  const estadoSeleccionado =
+    document.getElementById("filtroEstado")
+      .value;
+
+  sessionStorage.setItem(
+    "busquedaVehiculo",
+    textoBusqueda
+  );
+
+  sessionStorage.setItem(
+    "estadoVehiculo",
+    estadoSeleccionado
+  );
+
+  const filtrados =
+    inventarioActual.filter(v => {
+
+      const marca =
+        String(v.marca ?? v._marca ?? "")
+          .toLowerCase();
+
+      const modelo =
+        String(v.modelo ?? v._modelo ?? "")
+          .toLowerCase();
+
+      const estado =
+        String(v.estado ?? v._estado ?? "");
+
+      const coincideBusqueda =
+        marca.includes(textoBusqueda) ||
+        modelo.includes(textoBusqueda);
+
+      const coincideEstado =
+        estadoSeleccionado === "" ||
+        estado === estadoSeleccionado;
+
+      return (
+        coincideBusqueda &&
+        coincideEstado
+      );
+
+    });
+
+  renderizarTabla(
+    filtrados
+  );
+
 }
 
 async function limpiarInvalidos() {
