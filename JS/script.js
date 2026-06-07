@@ -2,9 +2,7 @@
 import persistencia from './Controller/Persistencia.js';
 import {ValidarEntrada} from './Controller/ValidarEntrada.js'
 import {Vehiculo} from './dto/Vehiculo.js'
-import {renderizarTabla, inicializarOGraficar, mostrarVista, actualizarMetricas } from './ui/Render.js';
 
-window.mostrarVista = mostrarVista;
 const validador = new ValidarEntrada();
 const formuVeh = document.getElementById("formulario-vehiculo");
 
@@ -22,24 +20,8 @@ function mostrarMsgErr(mensaje) {
 }
 
 async function cargarDataInicial() {
-
-    const vehiculos = await persistencia.ObtenerVehiculos();
-
-    console.log(
-        "Inventario cargado",
-        vehiculos
-    );
-    renderizarTabla(
-        vehiculos
-    );
-    actualizarMetricas(
-        vehiculos
-    );
-    inicializarOGraficar(
-        calcularEstados(
-            vehiculos
-        )
-    );
+    await persistencia.ObtenerVehiculos();
+    console.log("Inventario cargado");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -92,23 +74,13 @@ async function  enviarFormulario(evento) {
     vehiculo.anio = parseInt(vehiculo.anio, 10);
     vehiculo.precioUSD = parseFloat(vehiculo.precioUSD);
 
-if( await persistencia.GuardarVehiculo(vehiculo) ){
-  formuVeh.reset();
-  document
-  .getElementById("imput-id")
-  .value = "";
-
-const vehiculosActualizados = await persistencia.ObtenerVehiculos();
-
-  renderizarTabla(vehiculosActualizados);
-
-  actualizarMetricas(vehiculosActualizados);
-
-  inicializarOGraficar( calcularEstados( vehiculosActualizados ) );
-
-  mostrarVista( "inventario" );
-
-  }
+    if(await persistencia.GuardarVehiculo(vehiculo)){
+      formuVeh.reset();
+      document.getElementById("imput-id").value = "";
+      alert("Vehiculo guardado");
+    }else{
+      mostrarMsgErr("Error crítico: No se pudo escribir en el almacenamiento del navegador.");
+    }
 }
 
 async function limpiarInvalidos() {
@@ -117,40 +89,4 @@ async function limpiarInvalidos() {
     const element = invalidados[index];
     element.classList.remove('is-invalid');
   }
-}
-
-function calcularEstados(vehiculos){
-
-
-return {
-
-  Disponible:
-
-  vehiculos.filter(
-
-  v => v.estado === "Disponible"
-
-  ).length,
-
-
-  Vendido:
-
-  vehiculos.filter(
-
-  v => v.estado === "Vendido"
-
-  ).length,
-
-
-  Mantenimiento:
-
-  vehiculos.filter(
-
-  v => v.estado === "Mantenimiento"
-
-  ).length
-
-  };
-
-
 }
