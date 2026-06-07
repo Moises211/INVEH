@@ -3,6 +3,7 @@ import persistencia from './Controller/Persistencia.js';
 import { ValidarEntrada } from './Controller/ValidarEntrada.js'
 import { Vehiculo } from './dto/Vehiculo.js'
 import dashboardService from './Services/DashboardService.js';
+import graficoService from './Services/GraficoService.js';
 
 const validador = new ValidarEntrada();
 const formuVeh = document.getElementById("formulario-vehiculo");
@@ -40,6 +41,10 @@ workerAnalitica.onmessage = (evento) => {
   console.log("Analítica recibida:", datos);
 
   dashboardService.actualizarMetricas(datos);
+
+  graficoService.actualizar(
+    datos.estados
+  );
 
 };
 
