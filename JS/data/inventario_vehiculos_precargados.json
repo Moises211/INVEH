@@ -1,0 +1,31 @@
+{
+  "vehiculos": [
+    {
+      "id": "auto-1",
+      "marca": "Toyota",
+      "modelo": "Corolla",
+      "anio": 2022,
+      "precio": 20000,
+      "estado": "disponible",
+      "sucursalId": "suc-santa-ana"
+    },
+    {
+      "id": "auto-2",
+      "marca": "Honda",
+      "modelo": "Civic",
+      "anio": 2021,
+      "precio": 19000,
+      "estado": "mantenimiento",
+      "sucursalId": "suc-san-salvador"
+    },
+    {
+      "id": "auto-3",
+      "marca": "Nissan",
+      "modelo": "Versa",
+      "anio": 2020,
+      "precio": 15000,
+      "estado": "vendido",
+      "sucursalId": "suc-san-miguel"
+    }
+  ]
+}
