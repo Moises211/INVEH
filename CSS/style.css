@@ -1,0 +1,61 @@
+/* CSS/style.css */
+body {
+  background-color: #f1f3f5;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Tarjetas de sección SPA */
+.spa-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 25px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  margin-bottom: 20px;
+}
+
+/* Cajas de métricas del Dashboard */
+.metric-box {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.metric-box h6 {
+  font-size: 0.85rem;
+  text-uppercase: true;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+.metric-box h2 {
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+/* Contenedor de la gráfica */
+.canvas-container {
+  max-width: 100%;
+  height: auto;
+  max-height: 280px;
+  margin-top: 15px;
+}
+
+/* Insignias de estados para la tabla */
+.badge-disponible {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+.badge-reservado {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+.badge-vendido {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+/* Estilos de botones de acción en filas */
+.btn-action {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}

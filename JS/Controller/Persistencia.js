@@ -24,10 +24,11 @@ class Persistencia {
     async GuardarVehiculo(vehiculo) {
         try {
             var inventario = await this.ObtenerVehiculos();
-
+            console.log(`ID vehiculo: ${vehiculo.id}, ${vehiculo._id}`);
             if (vehiculo.id != null) { //para los precargados
                 //https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex
-                var indice = inventario.findIndex((/** @type {any} */ v) => v.id === vehiculo.id);
+                var indice = inventario.findIndex((/** @type {any} */ v) => v._id === vehiculo.id);
+                console.log(`ID vehiculo: ${vehiculo.id}, ${vehiculo._id} | ${indice.id}, ${vehiculo._id}`)
                 if (indice != -1) {
                     inventario[indice] = vehiculo;
                 }
@@ -50,7 +51,7 @@ class Persistencia {
     async EliminarVehiculo(id) {
         try {
             var inventario = await this.ObtenerVehiculos();
-            var vehiculoEliminar = inventario.filter((/** @type {any} */v) => v.id != id);
+            var vehiculoEliminar = inventario.filter((/** @type {any} */v) => v._id != id);
             localStorage.setItem(this.CLAVE_LOCALSTORAGE, JSON.stringify(vehiculoEliminar));
 
             return true;
