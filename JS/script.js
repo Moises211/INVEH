@@ -4,10 +4,40 @@ import { ValidarEntrada } from './Controller/ValidarEntrada.js'
 import { Vehiculo } from './dto/Vehiculo.js'
 import { LocalizacionServicio } from './Controller/LocalizacionServicio.js';
 import { CalculoDivisaService } from './Controller/CalculoDivisaService.js';
+import { AnaliticaService } from './Controller/AnaliticaService.js';
+import { FiltroServicio } from './Controller/FiltroServicio.js';
+import { ExportadorCSV } from './utils/ExportadorCSV.js';
+import Persistencia from './Controller/Persistencia.js';
 
 const validador = new ValidarEntrada();
 const geoServicio = new LocalizacionServicio();
 const divisaServicio = new CalculoDivisaService();
+const filtroServicio = new FiltroServicio();
+
+const analiticaServicio = new AnaliticaService((dataWorker) => {
+  var mt = document.getElementById('metrica-total');
+  if (mt) {
+    var disponibles = dataWorker.estados.Disponible || 0;
+    var reservados = dataWorker.estados.Reservado || 0;
+    mt.innerHTML = (disponibles + reservados).toString();
+  }
+
+  var mv = document.getElementById('metrica-valor');
+  if (mv) {
+    var valorConvertido = dataWorker.valorFlota * tasaCambioActual;
+    var prefijo = divisaActual == 'USD' ? '$' : (divisaActual == "EUR" ? "€" : "¥");
+    mv.innerHTML = prefijo + valorConvertido.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  var ms = document.getElementById('metrica-salidas');
+  if (ms) {
+    var vendidos = dataWorker.estados.Vendido || 0;
+    var reservados = dataWorker.estados.Reservado || 0;
+    ms.innerHTML = (reservados + vendidos).toString();
+  }
+
+  inicializarGraficasWorker(dataWorker.estados);
+});
 
 const formuVeh = document.getElementById("formulario-vehiculo");
 var miGraficoDona = null;
@@ -37,8 +67,19 @@ async function cargarDataInicial() {
     console.error("Error al obtener las divisas: ", er);
   }
   await ejModGeolocalizacion();
-  await renderizarTabla(vehiculos, divisaActual, tasaCambioActual);
-  await actualizarMetricas(vehiculos);
+  //await renderizarTabla(vehiculos, divisaActual, tasaCambioActual);
+  //await actualizarMetricas(vehiculos);
+
+  var filtrosSesion = filtroServicio.ObtenerFiltrosMemoria();
+  var inputBuscador = document.getElementById('input-busqueda-texto');
+  var selectEstado = document.getElementById('select-filtro-estado');
+
+  if (inputBuscador && filtrosSesion.texto) inputBuscador.value = filtrosSesion.texto;
+  if (selectEstado && filtrosSesion.estado) selectEstado.value = filtrosSesion.estado;
+
+  analiticaServicio.EjecutarProcesamientoAnalitico(vehiculos);
+  var filtrados = filtroServicio.FiltrarColeccion(vehiculos, filtrosSesion.texto, filtrosSesion.estado);
+  await renderizarTabla(filtrados, divisaActual, tasaCambioActual);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -59,14 +100,78 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (divisaActual == 'USD') tasaCambioActual = 1;
       if (divisaActual == 'EUR') tasaCambioActual = todasLasTasas.EUR;
       if (divisaActual == 'JPY') tasaCambioActual = todasLasTasas.JPY;
+
       var vehiculo = await persistencia.ObtenerVehiculos();
-      await renderizarTabla(vehiculo, divisaActual, tasaCambioActual);
+      analiticaServicio.EjecutarProcesamientoAnalitico(vehiculo);
+
+      var txtVal = document.getElementById('input-busqueda-texto')?.value || "";
+      var estVal = document.getElementById('select-filtro-estado')?.value || "TODOS";
+
+      var filtrados = filtroServicio.FiltrarColeccion(vehiculo, txtVal, estVal);
+      await renderizarTabla(filtrados, divisaActual, tasaCambioActual);
     });
-
   }
+  var txtBuscador = document.getElementById("input-busqueda-texto");
+  var selEstadoFiltro = document.getElementById("select-filtro-estado");
 
+  const procesarFiltrosDinamicos = async () => {
+    var txtVal = (txtBuscador)?.value || "";
+    var estVal = (selEstadoFiltro)?.value || "TODOS";
+
+    filtroServicio.GuardarFiltrosMemoria(txtVal, estVal);
+
+    var inventarioCompleto = await persistencia.ObtenerVehiculos();
+    var filtrados = filtroServicio.FiltrarColeccion(inventarioCompleto, txtVal, estVal);
+    await renderizarTabla(filtrados, divisaActual, tasaCambioActual);
+  };
+
+  txtBuscador?.addEventListener("input", procesarFiltrosDinamicos);
+  selEstadoFiltro?.addEventListener("change", procesarFiltrosDinamicos);
+
+  var btnExportar = document.getElementById("btn-exportar-csv");
+  btnExportar?.addEventListener("click", async () => {
+    try {
+      var datosExportar = await persistencia.ObtenerVehiculos();
+      ExportadorCSV.ExportarA_CSV(datosExportar);
+    } catch (err) {
+      // @ts-ignore
+      mostrarMsgErr(err.message);
+    }
+  });
+  var pillsTab = document.getElementById('pills-tab');
+  var dinamicoTitulo = document.getElementById('dinamico-titulo');
+  var dinamicoDescripcion = document.getElementById('dinamico-descripcion');
+
+  if (pillsTab && dinamicoTitulo && dinamicoDescripcion) {
+    pillsTab.addEventListener('shown.bs.tab', (evento) => {      
+      var tabActivaId = evento.target.id;
+
+      // Cambio de los textos segun la seccion de spd
+      switch (tabActivaId) {
+        case 'tab-dashboard':
+          dinamicoTitulo.innerText = "Dashboard de Métricas";
+          dinamicoDescripcion.innerText = "Visualiza los indicadores clave y el estado general del inventario.";
+          break;
+
+        case 'tab-inventario':
+          dinamicoTitulo.innerText = "Inventario de Vehículos";
+          dinamicoDescripcion.innerText = "Agrega vehículos y guarda el inventario en el almacenamiento del navegador.";
+          break;
+
+        case 'tab-sucursales':
+          dinamicoTitulo.innerText = "Nuestras Sucursales";
+          dinamicoDescripcion.innerText = "Consulta la ubicación geográfica de nuestros concesionarios y calcula distancias.";
+          break;
+
+        default:
+          break;
+      }
+    });
+  }
   cargarDataInicial();
 });
+
+
 
 //en evento se esperar el submit del formulario, es decir el boton send
 async function enviarFormulario(evento) {
@@ -81,7 +186,7 @@ async function enviarFormulario(evento) {
   vehiculo.anio = document.getElementById("imput-anio").value;
   vehiculo.precioUSD = document.getElementById("imput-precio").value;
   vehiculo.estado = document.getElementById("imput-estado").value;
-  vehiculo.sucursalId = document.getElementById("imput-suculsal").value;
+  vehiculo.suculsalId = document.getElementById("imput-suculsal").value;
 
   var validacion = await validador.ValidarDatosVehiculos(vehiculo);
   console.log("valido es: ", validacion.esValido);
@@ -112,9 +217,16 @@ async function enviarFormulario(evento) {
   if (await persistencia.GuardarVehiculo(vehiculo)) {
     formuVeh.reset();
     abortarEdicion();
+
     var datos = await persistencia.ObtenerVehiculos()
-    await renderizarTabla(datos, divisaActual, tasaCambioActual);
-    await actualizarMetricas(datos);
+    analiticaServicio.EjecutarProcesamientoAnalitico(datos);
+
+    var txtVal = document.getElementById("input-busqueda-texto")?.value || "";
+    var estVal = document.getElementById("select-filtro-estado")?.value || "TODOS";
+    var filtrados = filtroServicio.FiltrarColeccion(datos, txtVal, estVal)
+
+    await renderizarTabla(filtrados, divisaActual, tasaCambioActual);
+    //await actualizarMetricas(datos);
     document.getElementById("imput-id").value = "";
     alert("Vehiculo guardado");
   } else {
@@ -174,8 +286,14 @@ async function renderizarTabla(vehiculos, divisaActiva = 'USD', tasaConversion =
         var completado = await persistencia.EliminarVehiculo(v._id);
         if (completado) {
           var invRefress = await persistencia.ObtenerVehiculos();
-          await renderizarTabla(invRefress, divisaActual, tasaConversion);
-          await actualizarMetricas(invRefress);
+          analiticaServicio.EjecutarProcesamientoAnalitico(invRefress);
+
+          var txtVal = document.getElementById("input-busqueda-texto")?.value || "";
+          var estVal = document.getElementById("select-filtro-estado")?.value || "TODOS";
+          var filtrados = filtroServicio.FiltrarColeccion(invRefress, txtVal, estVal);
+
+          await renderizarTabla(filtrados, divisaActual, tasaConversion);
+          //await actualizarMetricas(invRefress);
         } else {
           mostrarMsgErr("Error al intentar eliminar el vehiculo");
         }
@@ -192,7 +310,7 @@ async function cargarVehiculoFormulario(vehiculo) {
   document.getElementById("imput-anio").value = vehiculo._anio;
   document.getElementById("imput-precio").value = vehiculo._precioUSD;
   document.getElementById("imput-estado").value = vehiculo._estado;
-  document.getElementById("imput-suculsal").value = vehiculo.sucursalId;
+  document.getElementById("imput-suculsal").value = vehiculo._suculsalId || vehiculo.suculsalId;
 
   document.getElementById("titulo-formulario").innerHTML = `<i class="bi bi-pencil-square me-2 text-warning"></i>Modificar Vehículo`;
   document.getElementById("btn-guardar").className = "btn btn-warning w-100";
@@ -212,7 +330,7 @@ function abortarEdicion() {
   limpiarInvalidos();
 }
 
-async function inicilizarGraficas(datosMetrica) {
+/*async function inicilizarGraficas(datosMetrica) {
   const ctx = document.getElementById("graficoEstados");
   //datos dashboard
   var vehiculos = await persistencia.ObtenerVehiculos();
@@ -254,6 +372,42 @@ async function inicilizarGraficas(datosMetrica) {
       }
     });
   }
+}*/
+function inicializarGraficasWorker(datosMetrica) {
+  const ctx = document.getElementById("graficoEstados");
+  if (!ctx) return;
+
+  var confData = {
+    labels: ['Disponible', 'Vendido', 'Reservado'],
+    datasets: [{
+      label: 'Vehiculo por Estado',
+      data: [datosMetrica.Disponible || 0, datosMetrica.Vendido || 0, datosMetrica.Reservado || 0],
+      backgroundColor: ['#198754', '#dc3545', '#ffc107'],
+      hoverOffset: 4
+    }]
+  };
+
+  if (!miGraficoDona) {
+    var ext = Chart.getChart(ctx);
+    if (ext) {
+      ext.destroy();
+    }
+  }
+
+  if (miGraficoDona) {
+    miGraficoDona.data = confData;
+    miGraficoDona.update();
+  } else {
+    // @ts-ignore
+    miGraficoDona = new Chart(ctx, {
+      type: 'doughnut',
+      data: confData,
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
 }
 
 async function actualizarMetricas(vehiculos) {
@@ -282,11 +436,11 @@ async function ejModGeolocalizacion() {
     var statusBanner = document.getElementById("geolocalizacion-status");
     if (statusBanner) statusBanner.classList.add("d-none");
     if (spanSantaAna && distancias["suc-santa-ana"]) spanSantaAna.innerText = `${distancias["suc-santa-ana"].toFixed(1)} km`;
-    
+
     if (spanSanSalvador && distancias["suc-san-salvador"]) spanSanSalvador.innerText = `${distancias["suc-san-salvador"].toFixed(1)} km`;
-    
+
     if (spanSanMiguel && distancias["suc-san-miguel"]) spanSanMiguel.innerText = `${distancias["suc-san-miguel"].toFixed(1)} km`;
-    
+
     var cont = document.getElementById('contenedor-alertas');
     if (!cont) return;
 
@@ -311,7 +465,7 @@ async function ejModGeolocalizacion() {
 
       if (target.checked) {
 
-        var vehiculoFiltro = vehiculos.filter(v => v.sucursalId == infSuc.id);
+        var vehiculoFiltro = vehiculos.filter(v => v._suculsalId == infSuc.id);
         console.info(vehiculos);
         await renderizarTabla(vehiculoFiltro, divisaActual, tasaCambioActual);
       }
