@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventario de Vehículos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="CSS/style.css" />
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">
+        <i class="bi bi-car-front-fill text-warning me-2">
+          Gestión de Inventario de Vehículos
+        </i>
+      </span>
+    </div>
+  </nav>
+
+
+  <div class="container my-4">
+    <header class="mb-4">
+      <h1 class="h3">Bienvenido al Panel de Operaciones Automotrices</h1>
+      <p class="text-muted mb-4">Aquí puedes gestionar tu inventario de vehículos, agregar nuevos vehículos y
+        visualizar las sucursales disponibles.</p>
+      <div class="border-top pt-3">
+        <h2 class="h4" id="dinamico-titulo">Dashboard de Métricas</h2>
+        <p class="text-muted" id="dinamico-descripcion">Visualiza los indicadores clave y el estado general del
+          inventario.</p>
+      </div>
+    </header>
+
+
+    <div id="contenedor-alertas"></div>
+
+    <ul class="nav nav-pills nav-justified bg-white p-2 rounded shadow-sm mb-4" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-dashboard" data-bs-toggle="pill" data-bs-target="#seccion-dashboard"
+          type="button" role="tab">
+          <i class="bi bi-speedometer2 me-2"></i>
+          Dashboard
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-inventario" data-bs-toggle="pill" data-bs-target="#seccion-inventario"
+          type="button" role="tab">
+          <i class="bi bi-truck me-2"></i>
+          Invenatario
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-sucursales" data-bs-toggle="pill" data-bs-target="#seccion-sucursales"
+          type="button" role="tab">
+          <i class="bi bi-geo-alt-fill me-2"></i>
+          Sucursales
+        </button>
+      </li>
+
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+
+      <div class="tab-pane fade show active" id="seccion-dashboard" role="tabpanel">
+        <div class="spa-card">
+          <h4 class="mb-4 text-dark">
+            <i class="bi bi-pie-chart-fill me-2 text-primary"></i>
+            Metricas e Indicadores
+          </h4>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="metric-box bg-primary text-white" title="Número total de vehículos en almacen">
+                <h6>Total de Vehículos</h6>
+                <h2 id="metrica-total">0</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-box bg-success text-white"
+                title="Valor total de todos los vehículos disponibles en el almacén">
+                <h6>Valor Total de Vehículos</h6>
+                <h2 id="metrica-valor">$0.00</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-box bg-warning text-dark" title="Número de vehículos que están reservados o vendidos">
+                <h6>Reservados/Vendidos</h6>
+                <h2 id="metrica-salidas">0</h2>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mx-auto canvas-container">
+              <canvas id="graficoEstados"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="seccion-inventario" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-5">
+            <div class="spa-card">
+              <h4 class="mb-3 text-dark" id="titulo-formulario">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>
+                Registro de Vehículos
+              </h4>
+              <form id="formulario-vehiculo" class="row g-3 needs-validation" novalidate>
+                <input type="hidden" id="imput-id" value="" />
+
+                <div class="col-md-12">
+                  <label for="imput-marca" class="form-label fw-semibold">Marca</label>
+                  <input type="text" class="form-control" id="imput-marca" placeholder="Ej. Toyota" />
+                  <div class="invalid-feedback">La marca es obligatoria.</div>
+                </div>
+
+                <div class="col-md-12">
+                  <label for="imput-modelo" class="form-label fw-semibold">Modelo</label>
+                  <input type="text" class="form-control" id="imput-modelo" placeholder="Ej. Corolla" />
+                  <div class="invalid-feedback">El modelo es obligatorio.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="imput-anio" class="form-label fw-semibold">Año</label>
+                  <input type="number" class="form-control" id="imput-anio" placeholder="Ej. 2024" />
+                  <div class="invalid-feedback">Ingrese un año válido entre 1920 y el próximo año.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="imput-precio" class="form-label fw-semibold">Precio (USD)</label>
+                  <input type="number" step="0.01" class="form-control" id="imput-precio" placeholder="Ej. 15000" />
+                  <div class="invalid-feedback">Ingrese un precio mayor a 0.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="imput-estado" class="form-label fw-semibold">Estado</label>
+                  <select class="form-select" id="imput-estado">
+                    <option value="" selected>Seleccione...</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Reservado">Reservado</option>
+                    <option value="Vendido">Vendido</option>
+                  </select>
+                  <div class="invalid-feedback">Seleccione un estado.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="imput-suculsal" class="form-label fw-semibold">Sucursal</label>
+                  <select class="form-select" id="imput-suculsal">
+                    <option value="" selected>Seleccione...</option>
+                    <option value="suc-santa-ana">San Ana</option>
+                    <option value="suc-san-salvador">San Salvador</option>
+                    <option value="suc-san-miguel">San Miguel</option>
+                  </select>
+                  <div class="invalid-feedback">Seleccione una sucursal.</div>
+                </div>
+
+                <div class="col-12 d-flex gap-2 mt-4">
+                  <button type="submit" class="btn btn-primary w-100" id="btn-guardar">Guardar</button>
+                  <button type="button" class="btn btn-secondary d-none" id="btn-cancelar-edicion">Cancelar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <div class="spa-card">
+
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h4 class="text-dark mb-0">
+                  <i class="bi bi-table me-2 text-primary"></i>
+                  Registros de Vehiculos
+                </h4>
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-success me-2" id="btn-exportar-csv">
+                    <i class="bi bi-filetype-csv me-1"></i> Exportar CSV
+                  </button>
+                  <div class="d-flex align-items-center gap-2">
+                    <label for="select-divisa" class="small text-muted text-nowrap fw-semibold">
+                      Mostrar precios en:</label>
+                    <select class="form-select form-select-sm" id="select-divisa" style="width: 110px;">
+                      <option value="USD" selected>USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="JPY">JPY (¥)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-md-7">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="input-busqueda-texto"
+                      placeholder="Buscar por marca o modelo..." />
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <select class="form-select form-select-sm" id="select-filtro-estado">
+                    <option value="TODOS" selected>Todos los estados</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Reservado">Reservado</option>
+                    <option value="Vendido">Vendido</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle w-100">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Vehiculo</th>
+                      <th>Modelo</th>
+                      <th>Año</th>
+                      <th>Precio</th>
+                      <th>Estado</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-vehiculos-body">
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="seccion-sucursales" role="tabpanel">
+        <div class="spa-card">
+          <div mb-4 text-dark>
+            <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
+            Ubicacion Geografica de Concesionarios
+            <div id="geolocalizacion-status" class="alert alert-secondary py3">
+              <i class="bi bi-geo-fill me-2 spinner-border spinner-border-sm text-primary"></i>
+              Estamos obteniendo tu ubicación para calcular la distancia a nuestras sucursales... Por favor, espera un
+              momento.
+            </div>
+            <div class="list-group shadow-sm">
+              <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                <div>
+                  <h6 class="mb-1 fw-bold">Lote Occidente -- Santa Ana</h6>
+                  <small class="text-muted">Codigo Sucursal: suc-santa-ana</small>
+                </div>
+                <span class="badge bg-dark rounded-pill p-2 fs-6" id="distancia-santa-ana">--km</span>
+              </div>
+              <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                <div>
+                  <h6 class="mb-1 fw-bold">Lote Central -- San Salvador</h6>
+                  <small class="text-muted">Codigo Sucursal: suc-san-salvador</small>
+                </div>
+                <span class="badge bg-dark rounded-pill p-2 fs-6" id="distancia-san-salvador">--km</span>
+              </div>
+              <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                <div>
+                  <h6 class="mb-1 fw-bold">Lote Oriente -- San Miguel</h6>
+                  <small class="text-muted">Codigo Sucursal: suc-san-miguel</small>
+                </div>
+                <span class="badge bg-dark rounded-pill p-2 fs-6" id="distancia-san-miguel">--km</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spa-card">
+          <h4 class="mb-4 text-dark">
+            <i class="bi bi-geo-alt-fill me-2 text-primary"></i>
+            Nuestras Sucursales
+          </h4>
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="card h-100 shadow-sm">
+                <img src="https://source.unsplash.com/400x300/?car-dealership" class="card-img-top"
+                  alt="Sucursal San Ana">
+                <div class="card-body">
+                  <h5 class="card-title" /> Sucursal San Ana</h5>
+                  <p class="card-text">Ubicada en el corazón de San Ana </p>
+                </div>
+                <img src="https://source.unsplash.com/400x300/?car-dealership" class="card-img-top"
+                  alt="Sucursal San Ana">
+                <div class="card-body">
+                  <h5 class="card-title" /> Sucursal San Salvador Ana</h5>
+                  <p class="card-text">Ubicada en el corazón de San Salvador</p>
+                </div>
+                <img src="https://source.unsplash.com/400x300/?car-dealership" class="card-img-top"
+                  alt="Sucursal San Ana">
+                <div class="card-body">
+                  <h5 class="card-title"> Sucursal San Miguel</h5>
+                  <p class="card-text">Ubicada en el corazón de San Miguel</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="JS/script.js"></script>
+</body>
+
+</html>
