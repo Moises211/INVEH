@@ -27,11 +27,13 @@
       <h1 class="h3">Bienvenido al Panel de Operaciones Automotrices</h1>
       <p class="text-muted mb-4">Aquí puedes gestionar tu inventario de vehículos, agregar nuevos vehículos y
         visualizar las sucursales disponibles.</p>
-      <header class="mb-4">
-        <h1 class="h3">Inventario de Vehículos</h1>
-        <p class="text-muted">Agrega vehículos y guarda el inventario en el almacenamiento del navegador.</p>
-      </header>
+      <div class="border-top pt-3">
+        <h2 class="h4" id="dinamico-titulo">Dashboard de Métricas</h2>
+        <p class="text-muted" id="dinamico-descripcion">Visualiza los indicadores clave y el estado general del
+          inventario.</p>
+      </div>
     </header>
+
 
     <div id="contenedor-alertas"></div>
 
@@ -47,7 +49,7 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="tab-inventario" data-bs-toggle="pill" data-bs-target="#seccion-inventario"
           type="button" role="tab">
-          <i class="bi bi-list-columns-reverse me-2"></i>
+          <i class="bi bi-truck me-2"></i>
           Invenatario
         </button>
       </li>
@@ -72,19 +74,20 @@
 
           <div class="row g-3 mb-4">
             <div class="col-md-4">
-              <div class="metric-box bg-primary text-white">
+              <div class="metric-box bg-primary text-white" title="Número total de vehículos en almacen">
                 <h6>Total de Vehículos</h6>
                 <h2 id="metrica-total">0</h2>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="metric-box bg-success text-white">
+              <div class="metric-box bg-success text-white"
+                title="Valor total de todos los vehículos disponibles en el almacén">
                 <h6>Valor Total de Vehículos</h6>
                 <h2 id="metrica-valor">$0.00</h2>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="metric-box bg-warning text-dark">
+              <div class="metric-box bg-warning text-dark" title="Número de vehículos que están reservados o vendidos">
                 <h6>Reservados/Vendidos</h6>
                 <h2 id="metrica-salidas">0</h2>
               </div>
@@ -138,7 +141,7 @@
                   <select class="form-select" id="imput-estado">
                     <option value="" selected>Seleccione...</option>
                     <option value="Disponible">Disponible</option>
-                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Reservado">Reservado</option>
                     <option value="Vendido">Vendido</option>
                   </select>
                   <div class="invalid-feedback">Seleccione un estado.</div>
@@ -164,24 +167,47 @@
           </div>
           <div class="col-lg-7">
             <div class="spa-card">
+
               <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <h4 class="text-dark mb-0">
                   <i class="bi bi-table me-2 text-primary"></i>
                   Registros de Vehiculos
                 </h4>
                 <div class="d-flex align-items-center gap-2">
-                  <label for="select-divisa" class="small text-muted text-nowrap fw-semibold">
-                    Mostrar precios en:</label>
-                  <select class="form-select form-select-sm" id="select-divisa" style="width: 110px;">
-                    <option value="USD" selected>USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="VES">VES</option>
+                  <button type="button" class="btn btn-sm btn-outline-success me-2" id="btn-exportar-csv">
+                    <i class="bi bi-filetype-csv me-1"></i> Exportar CSV
+                  </button>
+                  <div class="d-flex align-items-center gap-2">
+                    <label for="select-divisa" class="small text-muted text-nowrap fw-semibold">
+                      Mostrar precios en:</label>
+                    <select class="form-select form-select-sm" id="select-divisa" style="width: 110px;">
+                      <option value="USD" selected>USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="JPY">JPY (¥)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-md-7">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="input-busqueda-texto"
+                      placeholder="Buscar por marca o modelo..." />
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <select class="form-select form-select-sm" id="select-filtro-estado">
+                    <option value="TODOS" selected>Todos los estados</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Reservado">Reservado</option>
+                    <option value="Vendido">Vendido</option>
                   </select>
                 </div>
               </div>
 
               <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle w-100">
                   <thead class="table-light">
                     <tr>
                       <th>Vehiculo</th>
@@ -196,11 +222,11 @@
                   </tbody>
                 </table>
               </div>
+
             </div>
           </div>
+
         </div>
-
-
       </div>
 
       <div class="tab-pane fade" id="seccion-sucursales" role="tabpanel">
