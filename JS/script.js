@@ -4,12 +4,15 @@ import { ValidarEntrada } from './Controller/ValidarEntrada.js'
 import { Vehiculo } from './dto/Vehiculo.js'
 import dashboardService from './Services/DashboardService.js';
 import graficoService from './Services/GraficoService.js';
+import exportacionService from './Services/ExportacionService.js';
 
 const validador = new ValidarEntrada();
 const formuVeh = document.getElementById("formulario-vehiculo");
 const workerAnalitica = new Worker(
   './JS/Workers/AnaliticaWorker.js'
 );
+
+let inventarioActual = [];
 
 function mostrarMsgErr(mensaje) {
 
@@ -29,9 +32,12 @@ async function cargarDataInicial() {
   const inventario =
     await persistencia.ObtenerVehiculos();
 
+  inventarioActual = inventario;
+
   console.log("Inventario cargado");
 
   workerAnalitica.postMessage(inventario);
+
 }
 
 workerAnalitica.onmessage = (evento) => {
@@ -50,11 +56,30 @@ workerAnalitica.onmessage = (evento) => {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-
   if (formuVeh) {
     formuVeh.addEventListener("submit", enviarFormulario);
   }
+
+  const btnExportar =
+    document.getElementById("btnExportarCSV");
+
+  if (btnExportar) {
+
+    btnExportar.addEventListener(
+      "click",
+      () => {
+
+        exportacionService.exportarCSV(
+          inventarioActual
+        );
+
+      }
+    );
+
+  }
+
   cargarDataInicial();
+
 });
 
 //en evento se esperar el submit del formulario, es decir el boton send
