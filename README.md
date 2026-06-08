@@ -4,4 +4,4 @@ Aplicación que realiza mediante tecnologías web básicas (HTML 5, CSS 3 y JS V
 Colaboradores:
 - AA20029 — Moises A. Alvarenga A.
 - TV22002 — Marvin A. Torres V.
-- SG23001 - Luis Salamanca.
+- SG23001 — Luis E. Salamanca G.
