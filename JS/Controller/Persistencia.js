@@ -7,7 +7,7 @@ class Persistencia {
         try {
             const datosJson = localStorage.getItem(this.CLAVE_LOCALSTORAGE);
             var vehiculos = await this.ObtenerVehiculosPrecargados();
-            if (!datosJson) {
+            if (!datosJson || datosJson == 'undefined') {
                 localStorage.setItem(this.CLAVE_LOCALSTORAGE, JSON.stringify(vehiculos));
                 return vehiculos;
             }
