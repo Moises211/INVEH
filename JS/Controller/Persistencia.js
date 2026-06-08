@@ -61,15 +61,33 @@ class Persistencia {
         }
     }
 
+    
     async ObtenerVehiculosPrecargados() {
         try {
-            
-            var r = await fetch("./JS/data/inventario_vehiculos_precargados.json");
+            var r = await fetch("./data/inventario_vehiculos_precargados.json");
             if (!r.ok) throw new Error('No se pudo cargar el archivo');  
             var datos = await r.json();
+                
+            const listaPlana = datos.vehiculos || [];
             
-            return datos.vehiculo;
-        } catch (err){
+            return listaPlana.map(item => {
+                const nuevoVehiculo = new Vehiculo();
+                nuevoVehiculo.id = item.id;
+                nuevoVehiculo.marca = item.marca;
+                nuevoVehiculo.modelo = item.modelo;
+                nuevoVehiculo.anio = item.anio;
+                nuevoVehiculo.precioUSD = item.precio; // Mapea 'precio' del JSON a 'precioUSD'
+                
+                
+                const estadoFormateado = item.estado.charAt(0).toUpperCase() + item.estado.slice(1);
+                nuevoVehiculo.estado = estadoFormateado; 
+                
+                nuevoVehiculo.suculsalId = item.sucursalId; 
+                
+                return nuevoVehiculo;
+            });
+    
+        } catch (err) {
             console.error("Error en ObtenerVehiculosPrecargados:", err);
             return [];
         }
