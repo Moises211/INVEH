@@ -64,7 +64,7 @@ class Persistencia {
     
     async ObtenerVehiculosPrecargados() {
         try {
-            var r = await fetch("./data/inventario_vehiculos_precargados.json");
+            var r = await fetch("./JS/data/inventario_vehiculos_precargados.json");
             if (!r.ok) throw new Error('No se pudo cargar el archivo');  
             var datos = await r.json();
                 
@@ -76,7 +76,7 @@ class Persistencia {
                 nuevoVehiculo.marca = item.marca;
                 nuevoVehiculo.modelo = item.modelo;
                 nuevoVehiculo.anio = item.anio;
-                nuevoVehiculo.precioUSD = item.precio; // Mapea 'precio' del JSON a 'precioUSD'
+                nuevoVehiculo.precioUSD = item.precio; 
                 
                 
                 const estadoFormateado = item.estado.charAt(0).toUpperCase() + item.estado.slice(1);
