@@ -1,5 +1,5 @@
 //@ts-check
-
+import {Vehiculo} from '../dto/Vehiculo'
 class Persistencia {
     CLAVE_LOCALSTORAGE = 'inventario_vehiculos';
 
