@@ -6,7 +6,7 @@
       "modelo": "Corolla",
       "anio": 2022,
       "precio": 20000,
-      "estado": "disponible",
+      "estado": "Disponible",
       "sucursalId": "suc-santa-ana"
     },
     {
@@ -15,7 +15,7 @@
       "modelo": "Civic",
       "anio": 2021,
       "precio": 19000,
-      "estado": "mantenimiento",
+      "estado": "Reservado",
       "sucursalId": "suc-san-salvador"
     },
     {
@@ -24,7 +24,7 @@
       "modelo": "Versa",
       "anio": 2020,
       "precio": 15000,
-      "estado": "vendido",
+      "estado": "Vendido",
       "sucursalId": "suc-san-miguel"
     }
   ]
